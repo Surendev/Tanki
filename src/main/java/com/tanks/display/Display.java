@@ -23,16 +23,22 @@ public abstract class Display {
         //Program closing when user close window
         window.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
-        content = new Canvas();
+        content = new Canvas(){
+            @Override
+            public void paint(Graphics g){
+                super.paint(g);
+                render(g);
+            }
+        };
 
         //setting size to content, first to content, then to the window
         Dimension size = new Dimension(width, height);
         content.setPreferredSize(size);
-        content.setBackground(Color.black);
 
         //user can't resize window
         window.setResizable(false);
 
+        content.setBackground(Color.black);
         //ContentPane - inside window,except buttons close,minimize and e.g.
         window.getContentPane().add(content);
         //Window and content agreed size to size
@@ -42,5 +48,14 @@ public abstract class Display {
         window.setVisible(true);
     }
 
+    public static void render(){
+        content.repaint();
+    }
+
+    private static void render(Graphics g){
+
+        g.setColor(Color.white);
+        g.fillOval(350 , 250,  100, 100);
+    }
 
 }
