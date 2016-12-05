@@ -1,10 +1,10 @@
 package com.tanks.display;
 
+import com.tanks.io.Input;
+
 import javax.swing.*;
-import java.awt.Canvas;
-import java.awt.Graphics;
-import java.awt.Dimension;
-import java.awt.Color;
+import java.awt.*;
+import java.awt.image.BufferStrategy;
 import java.awt.image.BufferedImage;
 import java.awt.image.DataBufferInt;
 import java.util.Arrays;
@@ -24,10 +24,9 @@ public abstract class Display {
     private static Graphics bufferGraphics;
     private static int clearColor;
 
-//    temp
-    private static float delta = 0;
-//    temp end
-    public static void create(int width, int height, String title,int ClearColor) {
+    private static BufferStrategy bufferStrategy;
+
+    public static void create(int width, int height, String title,int ClearColor,int numBuffers) {
         if (created)
             return;
         window = new JFrame(title);
@@ -56,6 +55,12 @@ public abstract class Display {
         bufferData = ((DataBufferInt)buffer.getRaster().getDataBuffer()).getData();
         bufferGraphics = buffer.getGraphics();
 
+        ((Graphics2D)bufferGraphics).
+            setRenderingHint(RenderingHints.KEY_ANTIALIASING,RenderingHints.VALUE_ANTIALIAS_ON);
+
+        content.createBufferStrategy(numBuffers);
+        bufferStrategy = content.getBufferStrategy();
+
         created = true;
     }
 
@@ -64,16 +69,30 @@ public abstract class Display {
         Arrays.fill(bufferData,clearColor);
     }
 
-    public static void render(){
-//      draw image _ circle
-        bufferGraphics.setColor(new Color(0xff0000ff));
-        bufferGraphics.fillOval((int)(350 + 200 * Math.sin(delta)),250,100,100);
-        delta+=0.02f;
-    }
 
     public static void swapBuffers(){
 //      swap current graphic image with new created
-        Graphics g = content.getGraphics();
+        Graphics g = bufferStrategy.getDrawGraphics();
         g.drawImage(buffer,0,0,null);
+        bufferStrategy.show();
+    }
+
+    public static Graphics2D getGraphics(){
+        return (Graphics2D) bufferGraphics;
+    }
+
+    public static void destroy(){
+        if(!created){
+            return;
+        }
+        window.dispose();
+    }
+
+    public static void setTitle(String title){
+        window.setTitle(title);
+    }
+
+    public static void addInputListener(Input inputListener){
+        window.add(inputListener);
     }
 }
